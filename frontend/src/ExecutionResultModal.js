@@ -76,7 +76,7 @@ export const ExecutionResultModal = ({ isOpen, onClose, result, error }) => {
                 <>
                   <img
                     src={process.env.PUBLIC_URL + '/logo.jpg'}
-                    alt="VS Logo"
+                    alt="WS Logo"
                     style={{
                       width: '100%',
                       height: '100%',
@@ -90,7 +90,7 @@ export const ExecutionResultModal = ({ isOpen, onClose, result, error }) => {
                     }}
                   />
                   <span style={{ display: 'none', fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>
-                    VS
+                    WS
                   </span>
                 </>
               )}

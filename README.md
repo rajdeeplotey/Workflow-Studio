@@ -1,259 +1,226 @@
-# Pipeline Builder - Frontend Technical Assessment
+# Workflow Studio - AI Pipeline & Agent Engine
 
-A drag-and-drop pipeline builder built with React, React Flow, and FastAPI. Users can create node-based pipelines, connect them with edges, and submit the graph to a backend for cycle detection and analysis.
+A full-stack, drag-and-drop workflow builder built with **React**, **React Flow**, and **FastAPI**. Users can visually design, validate, and execute complex AI dataflows, REST API integrations, local vector RAG searches (ChromaDB), and autonomous AI agent loops.
 
-## Architecture
+---
 
-### Frontend Abstraction
+## AI & Execution Architecture Overview
 
-The core architectural decision is the **BaseNode abstraction** - a single reusable component that renders all node types through configuration rather than duplicated JSX.
+Workflow Studio has been upgraded with a pure Python execution engine and visual status tracking:
 
-#### Why This Matters
+```mermaid
+flowchart TD
+    subgraph Frontend [React + React Flow UI]
+        Canvas[Interactive Node Graph Editor]
+        Palette[Node Palette Toolbar]
+        Store[Zustand Multi-Workflow Store]
+        StatusBadge[Live Node Status Indicators]
+    end
 
-The starter code had 4 node types with significant duplication:
-- Each node contained its own JSX for box/label/handles
-- Field management was inconsistent (some used local useState, some had no state)
-- Styling was inline and inconsistent
-- Adding new nodes required copying/pasting large blocks of code
+    subgraph Backend [FastAPI Engine - Python 3]
+        Parse[/pipelines/parse - Cycle Detection/]
+        Exec[/pipelines/execute - Topological Engine/]
+        
+        subgraph EngineHandlers [Execution Handlers]
+            LLM[LLM Node Handler w/ System + User Prompts & Tool Calling]
+            API[Tool / API Node Handler GET/POST]
+            RAG[RAG Search Handler]
+            Agent[Bounded AI Agent Loop Handler max 3 steps]
+        end
 
-#### BaseNode Design
+        subgraph LocalVectorDB [Local Vector Store]
+            Chroma[(ChromaDB Store)]
+        end
+    end
 
-`BaseNode.js` accepts a configuration object:
-
-```javascript
-{
-  title: 'Node Name',
-  icon: '🔧',
-  accent: '#color',
-  width: 220,
-  minHeight: 100,
-  fields: [
-    {
-      name: 'fieldName',
-      label: 'Field Label',
-      type: 'text' | 'number' | 'select' | 'textarea',
-      defaultValue: value | (id) => computedValue,
-      options: [{ value, label }], // for select
-      placeholder: 'placeholder text'
-    }
-  ],
-  handles: [
-    {
-      id: 'handle-id',
-      type: 'source' | 'target',
-      position: 'left' | 'right' | 'top' | 'bottom',
-      top: 33 // optional - auto-spaced if omitted
-    }
-  ],
-  onFieldChange: (fieldName, value) => {} // optional callback
-}
+    Palette --> Canvas
+    Canvas --> Store
+    Store -->|Pipeline Payload| Parse
+    Store -->|Pipeline Payload| Exec
+    Exec --> EngineHandlers
+    RAG --> Chroma
+    Agent --> API
+    Agent --> RAG
+    LLM --> API
+    LLM --> RAG
+    EngineHandlers -->|Execution Logs & Node Status| StatusBadge
 ```
 
-#### Key Benefits
+### Key AI Components
 
-1. **True Abstraction**: Node files are now thin config objects (~20 lines each)
-2. **Consistent State Management**: All fields read/write to Zustand store
-3. **Automatic Handle Spacing**: Handles on the same side are evenly spaced without manual math
-4. **Visual Consistency**: Single CSS file (`BaseNode.css`) for all nodes
-5. **Extensibility**: Adding new node types takes minutes, not hours
+1. **Improved LLM Node**:
+   - Distinct **System Prompt** and **User Prompt** input fields.
+   - Dynamic `{{variable}}` interpolation in user prompt templates.
+   - Built-in **Single-Step Tool Calling** mode: prompts the model to pick from callable tools (`api_request`, `rag_search`), executes the chosen tool, and synthesizes a final response.
+   - Surface human-readable LLM API errors directly on the node UI.
 
-### State Management
+2. **Tool / API REST Node**:
+   - Supports **GET**, **POST**, **PUT**, and **DELETE** HTTP requests.
+   - Supports variable interpolation (`{{var}}`) inside URL, query parameters, and request body.
+   - Passes JSON/text responses forward as downstream node output.
+   - Handles HTTP 4xx/5xx status codes, timeouts, and network connection errors with explicit node warning badges.
 
-Zustand store (`store.js`) manages:
-- `nodes`: Array of React Flow nodes
-- `edges`: Array of React Flow edges  
-- `nodeIDs`: Counter for generating unique node IDs
-- `updateNodeField`: Centralized field update function
+3. **Local RAG Pipeline (ChromaDB)**:
+   - **Document Node**: Uploads text/PDF files or raw text, splits content into paragraph/fixed-size chunks, generates embeddings, and indexes them into a local **ChromaDB** store with zero paid cloud infrastructure.
+   - **RAG Search Node**: Takes search queries (supporting `{{var}}`), queries ChromaDB for the top-k relevant text chunks, and outputs formatted context blocks to pass into LLM prompts.
 
-### Backend Architecture
+4. **Bounded AI Agent Node**:
+   - Receives an overarching goal/instruction (supporting `{{var}}`).
+   - Executes a bounded reasoning loop capped at max 3 steps.
+   - Dynamically selects tools (`api_request` and `rag_search`), executes actions, and synthesizes answers.
+   - Displays transparent, step-by-step reasoning logs directly in the node card UI.
 
-FastAPI backend (`main.py`) with:
-- **Pydantic models** for type-safe request/response handling
-- **CORS middleware** configured for React dev server (localhost:3000)
-- **DFS cycle detection** using white/gray/black coloring algorithm
-- **Edge case handling**: empty graphs, single nodes, self-loops, disconnected components
+5. **Visible Execution Status Tracking**:
+   - Each node displays live execution status: **Pending (•)**, **Running (⏳)**, **Success (✓)**, or **Error (⚠️)** directly on its card header.
+   - Output previews and error banners render directly inside node cards.
 
-## Running the Application
+---
+
+## Setup & Running Locally
 
 ### Prerequisites
 
-- Node.js (v14+)
-- Python (v3.8+)
+- Python 3.8+
+- Node.js v14+
 - npm or yarn
 
 ### Backend Setup
 
-1. Navigate to backend directory:
-```bash
-cd backend
-```
+1. Navigate to `backend/`:
+   ```bash
+   cd backend
+   ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+2. Install Python dependencies (FastAPI, uvicorn, pydantic, httpx, chromadb):
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-3. Start the FastAPI server:
-```bash
-python -m uvicorn main:app --reload --port 8000
-```
-
-The backend will run on `http://localhost:8000`
+3. Start the FastAPI development server:
+   ```bash
+   python -m uvicorn main:app --reload --port 8000
+   ```
+   The backend runs on `http://127.0.0.1:8000`.
 
 ### Frontend Setup
 
-1. Navigate to frontend directory:
-```bash
-cd frontend
-```
+1. Navigate to `frontend/`:
+   ```bash
+   cd frontend
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. Install npm packages:
+   ```bash
+   npm install
+   ```
 
 3. Start the React development server:
-```bash
-npm start
+   ```bash
+   npm start
+   ```
+   The app opens automatically at `http://localhost:3000`.
+
+---
+
+## Worked Example Workflows
+
+### Worked Example 1: `Input -> LLM -> API -> Output`
+
+This workflow takes user lead details, generates a search topic via LLM, fetches external REST API data, and outputs the result.
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  Input Node  │ ──> │   LLM Node   │ ──> │   API Node   │ ──> │ Output Node  │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
 ```
 
-The frontend will run on `http://localhost:3000`
+#### Step-by-Step Graph Setup:
+1. **Input Node** (`input-1`):
+   - `inputName`: `post_id`
+   - `value`: `1`
+2. **LLM Node** (`llm-1`):
+   - `system`: "You format API query paths."
+   - `prompt`: "https://jsonplaceholder.typicode.com/posts/{{post_id}}"
+3. **API Node** (`api-1`):
+   - `method`: `GET`
+   - `url`: `{{prompt}}` (connected from LLM output)
+4. **Output Node** (`output-1`):
+   - `outputName`: `final_post_data`
+
+#### Execution Data Flow:
+- `input-1` passes `"1"` to `llm-1`.
+- `llm-1` interpolates `{{post_id}}` to return `"https://jsonplaceholder.typicode.com/posts/1"`.
+- `api-1` executes a HTTP GET request to JSONPlaceholder and receives the post JSON object.
+- `output-1` displays the resulting JSON object in the execution modal and terminal output.
+
+---
+
+### Worked Example 2: `Document -> RAG -> LLM -> Output`
+
+This workflow indexes a document into local ChromaDB vector store, retrieves relevant context based on a query, and uses an LLM to generate an answer.
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│ Document Node│ ──> │  RAG Search  │ ──> │   LLM Node   │ ──> │ Output Node  │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+```
+
+#### Step-by-Step Graph Setup:
+1. **Document Node** (`document-1`):
+   - `title`: `Return Policy`
+   - `text`: `Workflow Studio offers a 30-day full refund policy on all software licenses.`
+2. **RAG Search Node** (`ragSearch-1`):
+   - `query`: "What is the refund policy?"
+   - `top_k`: `1`
+3. **LLM Node** (`llm-2`):
+   - `system`: "You are a customer support AI."
+   - `prompt`: "Based on context: {{context}}, answer the customer."
+4. **Output Node** (`output-2`):
+   - `outputName`: `support_answer`
+
+#### Execution Data Flow:
+- `document-1` chunks and upserts the text into local ChromaDB.
+- `ragSearch-1` searches ChromaDB for "refund policy" and returns retrieved chunk: `"[1] (Return Policy): Workflow Studio offers a 30-day full refund policy..."`.
+- `llm-2` interpolates `{{context}}` into its user prompt and generates a customer support response.
+- `output-2` presents the final support answer.
+
+---
 
 ## Available Node Types
 
-### Original Nodes (Refactored)
-- **Input** (📥): Entry point for data with name and type fields
-- **Output** (📤): Exit point for data with name and type fields  
-- **LLM** (🤖): Language model node with system/prompt inputs and response output
-- **Text** (📝): Text template node with variable detection (enhanced)
+### Original & Core Nodes
+- **Input** (📥): Entry point for user/workflow input data.
+- **Output** (📤): Terminal node presenting final pipeline execution results.
+- **Text** (📝): Dynamic template node with real-time `{{variable}}` handle detection and auto-resizing.
+- **Math** (🔢): Operates arithmetic functions (add, subtract, multiply, divide, modulo).
+- **Filter** (🔍): Conditional filtering (`equals`, `contains`, `greater_than`).
+- **Timer** (⏱️): Delay node in seconds.
+- **Database** (🗄️): SQL query node simulation.
 
-### New Nodes (Added)
-- **Math** (🔢): Mathematical operations (add, subtract, multiply, divide, modulo)
-- **Filter** (🔍): Conditional filtering with pass/fail outputs
-- **Timer** (⏱️): Delay node with configurable time in seconds
-- **API Request** (🌐): HTTP request node with method and URL configuration
-- **Database** (🗄️): SQL query node with connection management
+### Practical AI & Tooling Nodes
+- **LLM** (🤖): Dual System/User prompts, prompt variable interpolation, and tool-calling mode.
+- **Tool / API** (🌐): Real REST API request executor (GET/POST/PUT/DELETE) with variable injection.
+- **Document** (📄): Text/PDF document chunker & local ChromaDB vector indexer.
+- **RAG Search** (🔍): Local vector similarity search returning top-k text chunks.
+- **AI Agent** (⚡): Bounded goal-driven agent loop with step-by-step reasoning logs.
 
-## Special Features
+---
 
-### Text Node Enhancements
+## Testing
 
-The Text node includes two advanced features:
-
-1. **Auto-resize**: The node dynamically adjusts its width and height based on text content, growing to fit the entered text rather than using fixed dimensions.
-
-2. **Variable Detection**: Parses text for `{{ variableName }}` patterns using regex. For each unique variable found, a new target handle is automatically created on the left side of the node, labeled with the variable name. Handles update in real-time as variables are added/removed/renamed.
-
-### Cycle Detection
-
-The backend implements robust cycle detection:
-
-- **Algorithm**: DFS with white/gray/black coloring (standard graph theory approach)
-- **Edge Cases Handled**:
-  - Empty graph (0 nodes) → `is_dag: true`
-  - Single node, no edges → `is_dag: true`
-  - Self-loop (node connected to itself) → `is_dag: false`
-  - Disconnected components → still valid DAG if no individual component has a cycle
-  - Multi-node cycles → correctly detected as `is_dag: false`
-
-### Error Handling
-
-The frontend includes comprehensive error handling:
-
-- **Network failures**: Clear message if backend is unreachable
-- **HTTP errors**: Status code and reason displayed to user
-- **User-friendly messages**: Plain language alerts, not raw JSON dumps
-- **Console logging**: Detailed errors logged for debugging
-
-## Design Decisions
-
-### Why BaseNode Over Higher-Order Components?
-
-While HOCs or render props could work, the config object approach was chosen because:
-- **Declarative**: Node definitions read like data, not code
-- **Type-safe**: Easier to add TypeScript validation if needed
-- **Predictable**: No complex component composition to reason about
-- **Debuggable**: Configuration is inspectable at runtime
-
-### Why Local State in Text Node?
-
-The Text node uses local state for the text field to enable real-time variable detection and auto-resize, but syncs with the global store on every change. This hybrid approach provides:
-- **Immediate feedback**: Variable handles update as you type
-- **Performance**: No store re-renders on every keystroke
-- **Consistency**: Final value always reaches global state
-
-### Why DFS for Cycle Detection?
-
-DFS with coloring is the standard algorithm for cycle detection because:
-- **Time complexity**: O(V + E) - optimal for this use case
-- **Space complexity**: O(V) - manageable for typical pipeline sizes
-- **Correctness**: Proven algorithm, handles all edge cases
-- **Clarity**: Easy to understand and maintain
-
-### Why Pydantic Models?
-
-Using Pydantic for request validation provides:
-- **Type safety**: Catches type errors before they reach business logic
-- **Documentation**: Auto-generated OpenAPI docs
-- **Validation**: Automatic schema validation
-- **IDE support**: Better autocomplete and type hints
-
-## Testing the Application
-
-### Manual Test Cases
-
-1. **Empty Pipeline**: Submit with no nodes → should return `num_nodes: 0, num_edges: 0, is_dag: true`
-
-2. **Single Node**: Add one node, no edges → should return `num_nodes: 1, num_edges: 0, is_dag: true`
-
-3. **Valid DAG**: Create a linear chain (Input → LLM → Output) → should return `is_dag: true`
-
-4. **Self-Loop**: Connect a node's output to its own input → should return `is_dag: false`
-
-5. **Cycle**: Create a cycle (A → B → C → A) → should return `is_dag: false`
-
-6. **Backend Down**: Stop the backend server and click submit → should show user-friendly error message
-
-7. **Text Variables**: Type "{{foo}} {{bar}}" in Text node → should create two target handles labeled "foo" and "bar"
-
-8. **Node Creation**: Drag each node type to canvas → should render with correct styling and fields
-
-## File Structure
-
-```
-frontend/
-├── src/
-│   ├── nodes/
-│   │   ├── BaseNode.js       # Shared node component
-│   │   ├── BaseNode.css      # Unified styling
-│   │   ├── inputNode.js      # Input node config
-│   │   ├── outputNode.js     # Output node config
-│   │   ├── llmNode.js        # LLM node config
-│   │   ├── textNode.js       # Text node (with enhancements)
-│   │   ├── mathNode.js       # Math node config
-│   │   ├── filterNode.js     # Filter node config
-│   │   ├── timerNode.js      # Timer node config
-│   │   ├── apiNode.js        # API node config
-│   │   └── databaseNode.js   # Database node config
-│   ├── store.js              # Zustand state management
-│   ├── ui.js                 # React Flow canvas
-│   ├── toolbar.js            # Draggable node toolbar
-│   ├── submit.js             # Submit button with API call
-│   ├── draggableNode.js      # Draggable node component
-│   └── App.js                # Main app component
-backend/
-├── main.py                   # FastAPI application
-└── requirements.txt          # Python dependencies
+### Run Backend Unit Tests
+```bash
+python backend/test_main.py
 ```
 
-## Future Improvements
+### Run Frontend Tests
+```bash
+cd frontend
+npm test -- --watchAll=false
+```
 
-Potential enhancements for production use:
-- Add TypeScript for type safety
-- Implement undo/redo functionality
-- Add node search and filtering
-- Implement pipeline save/load
-- Add more sophisticated error recovery
-- Create node library with reusable templates
-- Add collaborative editing features
-- Implement pipeline execution engine
+---
+
+## License
+
+MIT License. Designed for Workflow Studio Technical Assessment.

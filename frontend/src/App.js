@@ -131,7 +131,7 @@ function App() {
           }}>
             <img 
               src={process.env.PUBLIC_URL + '/logo.jpg'} 
-              alt="VectorShift Logo" 
+              alt="Workflow Studio Logo" 
               style={{
                 width: '100%',
                 height: '100%',
@@ -144,7 +144,7 @@ function App() {
                 }
               }}
             />
-            <span style={{ display: 'none', fontSize: '14px', fontWeight: '400', color: 'var(--text-primary)' }}>VS</span>
+            <span style={{ display: 'none', fontSize: '14px', fontWeight: '400', color: 'var(--text-primary)' }}>WS</span>
           </div>
           <div>
             <h1 style={{
@@ -157,7 +157,7 @@ function App() {
               alignItems: 'center',
               gap: '8px'
             }}>
-              VectorShift Workflow Studio
+              Workflow Studio
             </h1>
             <span style={{
               color: 'var(--text-muted)',

@@ -172,7 +172,7 @@ export const DocumentRecoverySidebar = () => {
           }}>
             <img
               src={process.env.PUBLIC_URL + '/logo.jpg'}
-              alt="VS Logo"
+              alt="WS Logo"
               style={{
                 width: '100%',
                 height: '100%',
@@ -186,7 +186,7 @@ export const DocumentRecoverySidebar = () => {
               }}
             />
             <span style={{ display: 'none', fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>
-              VS
+              WS
             </span>
           </div>
           <div>
@@ -225,7 +225,7 @@ export const DocumentRecoverySidebar = () => {
           lineHeight: '1.5',
           color: 'var(--text-secondary)'
         }}>
-          VectorShift Studio recovered unsaved workflow files from a recent session close or power cut.
+          Workflow Studio recovered unsaved workflow files from a recent session close or power cut.
           Click any workflow below to preview it in the background, then decide whether to restore or start fresh.
         </p>
 

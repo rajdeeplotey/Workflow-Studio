@@ -72,6 +72,9 @@ export const PipelineToolbar = () => {
                 <DraggableNode type='timer' label='Timer' />
                 <DraggableNode type='api' label='API' />
                 <DraggableNode type='database' label='Database' />
+                <DraggableNode type='document' label='Document' />
+                <DraggableNode type='ragSearch' label='RAG Search' />
+                <DraggableNode type='agent' label='Agent' />
             </div>
 
             {/* Right Side: Single Arrow Selection Icon & Save Button in front of Drag to Canvas */}

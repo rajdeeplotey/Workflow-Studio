@@ -149,8 +149,42 @@ export const BaseNode = ({ id, data, config }) => {
 
   // Get sequential instance number from node id (e.g. 'llm-1' -> 1)
   const getNodeNumber = (nodeId) => {
+    if (!nodeId) return '';
     const num = nodeId.split('-').pop();
     return isNaN(num) ? num : parseInt(num, 10);
+  };
+
+  // Render status badge (Pending / Running / Success / Error)
+  const renderStatusBadge = () => {
+    const status = data.status;
+    if (!status) return null;
+
+    let badgeStyle = {
+      fontSize: '10px',
+      fontWeight: '700',
+      padding: '2px 6px',
+      borderRadius: '4px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '4px',
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em'
+    };
+
+    if (status === 'success') {
+      badgeStyle = { ...badgeStyle, background: 'rgba(16, 185, 129, 0.25)', color: '#10B981', border: '1px solid #10B981' };
+      return <span style={badgeStyle}>✓ Success</span>;
+    } else if (status === 'error') {
+      badgeStyle = { ...badgeStyle, background: 'rgba(239, 68, 68, 0.25)', color: '#EF4444', border: '1px solid #EF4444' };
+      return <span style={badgeStyle}>⚠️ Error</span>;
+    } else if (status === 'running') {
+      badgeStyle = { ...badgeStyle, background: 'rgba(245, 158, 11, 0.25)', color: '#F59E0B', border: '1px solid #F59E0B' };
+      return <span style={badgeStyle}>⏳ Running</span>;
+    } else if (status === 'pending') {
+      badgeStyle = { ...badgeStyle, background: 'rgba(148, 163, 184, 0.25)', color: '#94A3B8', border: '1px solid #94A3B8' };
+      return <span style={badgeStyle}>• Pending</span>;
+    }
+    return null;
   };
 
   return (
@@ -158,7 +192,8 @@ export const BaseNode = ({ id, data, config }) => {
       className="basenode-container"
       style={{
         width: config.width || 220,
-        minHeight: config.minHeight || 80
+        minHeight: config.minHeight || 80,
+        borderColor: data.status === 'error' ? '#EF4444' : data.status === 'success' ? '#10B981' : undefined
       }}
     >
       {/* Floating Delete Cross Button with Proportional SVG Vector */}
@@ -176,35 +211,39 @@ export const BaseNode = ({ id, data, config }) => {
         </svg>
       </button>
 
-      {/* Header: Type Name on Left, Instance Number on Right */}
+      {/* Header: Type Name on Left, Status Badge & Instance Number on Right */}
       <div
         className="basenode-header"
         style={{
           background: config.accent || '#6366F1',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          gap: '6px'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
           {config.icon && <span className="basenode-icon">{config.icon}</span>}
-          <span className="basenode-title" style={{ fontWeight: '600' }}>
+          <span className="basenode-title" style={{ fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {config.title}
           </span>
         </div>
 
-        <span style={{
-          fontSize: '11px',
-          fontWeight: '700',
-          opacity: 0.9,
-          padding: '1px 6px',
-          borderRadius: '4px',
-          background: 'rgba(0, 0, 0, 0.18)',
-          color: '#FFFFFF',
-          fontFamily: 'var(--font-sans)'
-        }}>
-          {getNodeNumber(id)}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {renderStatusBadge()}
+          <span style={{
+            fontSize: '11px',
+            fontWeight: '700',
+            opacity: 0.9,
+            padding: '1px 6px',
+            borderRadius: '4px',
+            background: 'rgba(0, 0, 0, 0.18)',
+            color: '#FFFFFF',
+            fontFamily: 'var(--font-sans)'
+          }}>
+            {getNodeNumber(id)}
+          </span>
+        </div>
       </div>
 
       {/* Handles & Labels */}
@@ -226,6 +265,46 @@ export const BaseNode = ({ id, data, config }) => {
 
       {/* Children slot for node-specific extras */}
       {config.children && <div className="basenode-fields">{config.children}</div>}
+
+      {/* Inline Node Execution Error Message Banner */}
+      {data.error && (
+        <div style={{
+          margin: '8px',
+          padding: '8px',
+          borderRadius: '6px',
+          background: 'rgba(239, 68, 68, 0.12)',
+          border: '1px solid rgba(239, 68, 68, 0.4)',
+          color: '#EF4444',
+          fontSize: '11px',
+          lineHeight: '1.4',
+          wordBreak: 'break-word'
+        }}>
+          <strong>Error:</strong> {data.error}
+        </div>
+      )}
+
+      {/* Inline Node Execution Output Display (if no children slot used) */}
+      {!config.children && data.output !== undefined && !data.error && (
+        <div style={{
+          margin: '8px',
+          padding: '8px',
+          borderRadius: '6px',
+          background: 'var(--bg-input)',
+          border: '1px solid var(--border-color)',
+          fontSize: '11px',
+          color: 'var(--text-primary)',
+          maxHeight: '120px',
+          overflowY: 'auto'
+        }}>
+          <div style={{ fontSize: '9px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>
+            Output:
+          </div>
+          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
+            {typeof data.output === 'object' ? JSON.stringify(data.output, null, 2) : String(data.output)}
+          </pre>
+        </div>
+      )}
     </div>
   );
 };
+

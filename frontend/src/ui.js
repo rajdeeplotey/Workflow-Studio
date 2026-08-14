@@ -15,6 +15,9 @@ import { FilterNode } from './nodes/filterNode';
 import { TimerNode } from './nodes/timerNode';
 import { ApiNode } from './nodes/apiNode';
 import { DatabaseNode } from './nodes/databaseNode';
+import { DocumentNode } from './nodes/documentNode';
+import { RAGSearchNode } from './nodes/ragSearchNode';
+import { AgentNode } from './nodes/agentNode';
 
 import 'reactflow/dist/style.css';
 
@@ -28,7 +31,10 @@ const accentColors = {
   filter: '#34D399',
   timer: '#C084FC',
   api: '#38BDF8',
-  database: '#FBBF24'
+  database: '#FBBF24',
+  document: '#A855F7',
+  ragSearch: '#EC4899',
+  agent: '#10B981'
 };
 
 const gridSize = 16;
@@ -43,6 +49,9 @@ const nodeTypes = {
   timer: TimerNode,
   api: ApiNode,
   database: DatabaseNode,
+  document: DocumentNode,
+  ragSearch: RAGSearchNode,
+  agent: AgentNode
 };
 
 const selector = (state) => ({
@@ -122,13 +131,16 @@ export const PipelineUI = () => {
       const typeDefaults = {
         customInput: { inputName: nodeID.replace('customInput-', 'input_'), inputType: 'Text' },
         customOutput: { outputName: nodeID.replace('customOutput-', 'output_'), outputType: 'Text' },
-        llm: {},
-        text: {},
+        llm: { system: '', prompt: '{{input}}', tools_enabled: false },
+        text: { text: '{{input}}' },
         math: { operation: 'add', operand: 0 },
         filter: { condition: 'equals', value: '' },
         timer: { delay: 1 },
-        api: { method: 'GET', url: '' },
-        database: { query: 'SELECT * FROM table', connection: 'default' }
+        api: { method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts/1', body: '' },
+        database: { query: 'SELECT * FROM table', connection: 'default' },
+        document: { title: 'Sample Document', text: 'Workflow Studio AI features document context.' },
+        ragSearch: { query: '{{input}}', top_k: 3 },
+        agent: { goal: 'Process workflow goal using tools', max_steps: 3 }
       };
       return { id: nodeID, nodeType: `${type}`, ...typeDefaults[type] };
     };

@@ -1,4 +1,4 @@
-// apiNode.js
+// ragSearchNode.js - RAG Vector Search Node
 
 import { useState, useEffect, useMemo } from 'react';
 import { useUpdateNodeInternals } from 'reactflow';
@@ -8,44 +8,35 @@ import './BaseNode.css';
 
 const VARIABLE_REGEX = /\{\{\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*\}\}/g;
 
-export const ApiNode = ({ id, data }) => {
+export const RAGSearchNode = ({ id, data }) => {
   const { updateNodeField } = useStore();
   const updateNodeInternals = useUpdateNodeInternals();
 
-  const [method, setMethod] = useState(data?.method || 'GET');
-  const [url, setUrl] = useState(data?.url || '');
-  const [body, setBody] = useState(data?.body || '');
+  const [query, setQuery] = useState(data?.query || '');
+  const [topK, setTopK] = useState(data?.top_k || 3);
 
   useEffect(() => {
-    if (data?.method !== undefined && data.method !== method) {
-      setMethod(data.method);
-    }
-    if (data?.url !== undefined && data.url !== url) {
-      setUrl(data.url);
-    }
-    if (data?.body !== undefined && data.body !== body) {
-      setBody(data.body);
-    }
+    if (data?.query !== undefined && data.query !== query) setQuery(data.query);
+    if (data?.top_k !== undefined && data.top_k !== topK) setTopK(data.top_k);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.method, data?.url, data?.body]);
+  }, [data?.query, data?.top_k]);
 
-  // Extract variables from both URL and Body
+  // Extract variables from query
   const variables = useMemo(() => {
     const matches = new Set();
-    const combined = `${url} ${body}`;
     let match;
     const regex = new RegExp(VARIABLE_REGEX.source, 'g');
-    while ((match = regex.exec(combined)) !== null) {
+    while ((match = regex.exec(query)) !== null) {
       matches.add(match[1]);
     }
     return Array.from(matches);
-  }, [url, body]);
+  }, [query]);
 
   useEffect(() => {
     updateNodeInternals(id);
 
     const validHandleIds = new Set([
-      `${id}-input`,
+      `${id}-query`,
       ...variables.map((v) => `var-${v}`)
     ]);
 
@@ -69,32 +60,26 @@ export const ApiNode = ({ id, data }) => {
       useStore.setState({ edges: updatedEdges });
       useStore.getState().syncActiveWorkflow(useStore.getState().nodes, updatedEdges);
     }
-  }, [url, body, id, variables, updateNodeInternals]);
+  }, [query, id, variables, updateNodeInternals]);
 
-  const handleMethodChange = (e) => {
+  const handleQueryChange = (e) => {
     const val = e.target.value;
-    setMethod(val);
-    updateNodeField(id, 'method', val);
+    setQuery(val);
+    updateNodeField(id, 'query', val);
   };
 
-  const handleUrlChange = (e) => {
-    const val = e.target.value;
-    setUrl(val);
-    updateNodeField(id, 'url', val);
-  };
-
-  const handleBodyChange = (e) => {
-    const val = e.target.value;
-    setBody(val);
-    updateNodeField(id, 'body', val);
+  const handleTopKChange = (e) => {
+    const val = parseInt(e.target.value, 10) || 3;
+    setTopK(val);
+    updateNodeField(id, 'top_k', val);
   };
 
   const handles = [
     {
-      id: `${id}-input`,
+      id: `${id}-query`,
       type: 'target',
       position: 'left',
-      label: 'input'
+      label: 'query'
     },
     ...variables.map((v) => ({
       id: `var-${v}`,
@@ -103,55 +88,44 @@ export const ApiNode = ({ id, data }) => {
       label: v
     })),
     {
-      id: `${id}-response`,
+      id: `${id}-context`,
       type: 'source',
       position: 'right',
-      label: 'response'
+      label: 'context'
     }
   ];
 
   const config = {
-    title: 'Tool / API',
-    icon: '🌐',
-    accent: '#38BDF8',
+    title: 'RAG Search',
+    icon: '🔍',
+    accent: '#EC4899',
     width: 250,
-    minHeight: 180,
+    minHeight: 160,
     handles: handles,
     children: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div>
-          <label className="basenode-field-label">HTTP Method</label>
-          <select className="nodrag basenode-select" value={method} onChange={handleMethodChange}>
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="basenode-field-label">URL (supports &#123;&#123;variable&#125;&#125;)</label>
+          <label className="basenode-field-label">Search Query (supports &#123;&#123;variable&#125;&#125;)</label>
           <input
             className="nodrag basenode-input"
             type="text"
-            value={url}
-            onChange={handleUrlChange}
-            placeholder="https://api.example.com/data/{{id}}"
+            value={query}
+            onChange={handleQueryChange}
+            placeholder="e.g. {{user_question}}"
           />
         </div>
 
-        {(method === 'POST' || method === 'PUT') && (
-          <div>
-            <label className="basenode-field-label">Request Body (JSON / Text)</label>
-            <textarea
-              className="nodrag basenode-textarea"
-              value={body}
-              onChange={handleBodyChange}
-              placeholder='{"query": "{{input}}"}'
-              rows={2}
-            />
-          </div>
-        )}
+        <div>
+          <label className="basenode-field-label">Top-K Results</label>
+          <input
+            className="nodrag basenode-number"
+            type="number"
+            min={1}
+            max={10}
+            value={topK}
+            onChange={handleTopKChange}
+          />
+        </div>
 
         {variables.length > 0 && (
           <div style={{ marginTop: '2px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>

@@ -59,6 +59,15 @@ export const SubmitButton = () => {
   // Run Execution Engine (/pipelines/execute)
   const handleExecuteSubmit = async () => {
     setExecLoading(true);
+    
+    // Set all nodes status to 'running' initially
+    const initialRunningNodes = nodes.map(n => ({
+      ...n,
+      data: { ...n.data, status: 'running', error: null }
+    }));
+    useStore.setState({ nodes: initialRunningNodes });
+    useStore.getState().syncActiveWorkflow(initialRunningNodes, edges);
+
     try {
       const response = await fetch('http://127.0.0.1:8000/pipelines/execute', {
         method: 'POST',
@@ -77,13 +86,49 @@ export const SubmitButton = () => {
       setExecResult(data);
       setExecError(null);
       setExecModalOpen(true);
+
+      // Update nodes in store with output & status from node_execution_logs
+      if (data.success && data.node_execution_logs) {
+        const updatedNodes = useStore.getState().nodes.map(n => {
+          const log = data.node_execution_logs[n.id];
+          if (log) {
+            return {
+              ...n,
+              data: {
+                ...n.data,
+                status: log.status || (log.error ? 'error' : 'success'),
+                output: log.output,
+                error: log.error || null
+              }
+            };
+          }
+          return n;
+        });
+        useStore.setState({ nodes: updatedNodes });
+        useStore.getState().syncActiveWorkflow(updatedNodes, edges);
+      } else if (!data.success) {
+        const errorNodes = useStore.getState().nodes.map(n => ({
+          ...n,
+          data: { ...n.data, status: 'error', error: data.error || 'Execution failed' }
+        }));
+        useStore.setState({ nodes: errorNodes });
+        useStore.getState().syncActiveWorkflow(errorNodes, edges);
+      }
     } catch (err) {
-      setExecError(err.message.includes('Failed to fetch')
+      const errorMsg = err.message.includes('Failed to fetch')
         ? "Couldn't reach the backend — is it running on port 8000?"
-        : err.message);
+        : err.message;
+      setExecError(errorMsg);
       setExecResult(null);
       setExecModalOpen(true);
       console.error('Execute error:', err);
+
+      const failedNodes = useStore.getState().nodes.map(n => ({
+        ...n,
+        data: { ...n.data, status: 'error', error: errorMsg }
+      }));
+      useStore.setState({ nodes: failedNodes });
+      useStore.getState().syncActiveWorkflow(failedNodes, edges);
     } finally {
       setExecLoading(false);
     }
