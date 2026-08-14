@@ -53,7 +53,7 @@ export const AutoRecoveryToast = () => {
         fontWeight: 'bold',
         fontSize: '11px'
       }}>
-        ⚡
+        🛡️
       </span>
 
       <span>

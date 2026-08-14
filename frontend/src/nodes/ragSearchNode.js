@@ -98,7 +98,7 @@ export const RAGSearchNode = ({ id, data }) => {
   const config = {
     title: 'RAG Search',
     icon: '🔍',
-    accent: '#EC4899',
+    accent: '#14B8A6',
     width: 250,
     minHeight: 160,
     handles: handles,

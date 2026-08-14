@@ -32,9 +32,9 @@ const accentColors = {
   timer: '#C084FC',
   api: '#38BDF8',
   database: '#FBBF24',
-  document: '#A855F7',
-  ragSearch: '#EC4899',
-  agent: '#10B981'
+  document: '#EAB308',
+  ragSearch: '#14B8A6',
+  agent: '#8B5CF6'
 };
 
 const gridSize = 16;

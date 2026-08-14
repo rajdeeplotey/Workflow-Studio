@@ -9,7 +9,10 @@ const nodeIcons = {
   filter: '🔍',
   timer: '⏱️',
   api: '🌐',
-  database: '🗄️'
+  database: '🗄️',
+  document: '📄',
+  ragSearch: '🔍',
+  agent: '🧠'
 };
 
 const nodeAccents = {
@@ -21,7 +24,10 @@ const nodeAccents = {
   filter: { bg: 'rgba(16, 185, 129, 0.16)', border: 'rgba(16, 185, 129, 0.45)', text: 'var(--text-primary)' },
   timer: { bg: 'rgba(168, 85, 247, 0.16)', border: 'rgba(168, 85, 247, 0.45)', text: 'var(--text-primary)' },
   api: { bg: 'rgba(14, 165, 233, 0.16)', border: 'rgba(14, 165, 233, 0.45)', text: 'var(--text-primary)' },
-  database: { bg: 'rgba(217, 119, 6, 0.16)', border: 'rgba(217, 119, 6, 0.45)', text: 'var(--text-primary)' }
+  database: { bg: 'rgba(217, 119, 6, 0.16)', border: 'rgba(217, 119, 6, 0.45)', text: 'var(--text-primary)' },
+  document: { bg: 'rgba(234, 179, 8, 0.16)', border: 'rgba(234, 179, 8, 0.45)', text: 'var(--text-primary)' },
+  ragSearch: { bg: 'rgba(20, 184, 166, 0.16)', border: 'rgba(20, 184, 166, 0.45)', text: 'var(--text-primary)' },
+  agent: { bg: 'rgba(139, 92, 246, 0.16)', border: 'rgba(139, 92, 246, 0.45)', text: 'var(--text-primary)' }
 };
 
 export const DraggableNode = ({ type, label }) => {
@@ -68,7 +74,7 @@ export const DraggableNode = ({ type, label }) => {
         }}
         draggable
       >
-        <span style={{ fontSize: '13px' }}>{nodeIcons[type] || '⚡'}</span>
+        <span style={{ fontSize: '13px' }}>{nodeIcons[type] || '🧩'}</span>
         <span>{label}</span>
       </div>
     );

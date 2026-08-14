@@ -80,7 +80,7 @@ export const DocumentNode = ({ id, data }) => {
   const config = {
     title: 'Document',
     icon: '📄',
-    accent: '#A855F7',
+    accent: '#EAB308',
     width: 250,
     minHeight: 180,
     handles: handles,
@@ -116,7 +116,7 @@ export const DocumentNode = ({ id, data }) => {
               fontSize: '11px',
               fontWeight: '600',
               color: '#FFFFFF',
-              background: '#A855F7',
+              background: '#EAB308',
               borderRadius: '6px',
               cursor: 'pointer',
               display: 'inline-block'

@@ -100,8 +100,8 @@ export const AgentNode = ({ id, data }) => {
 
   const config = {
     title: 'AI Agent',
-    icon: '⚡',
-    accent: '#10B981',
+    icon: '🧠',
+    accent: '#8B5CF6',
     width: 270,
     minHeight: 200,
     handles: handles,
@@ -150,9 +150,9 @@ export const AgentNode = ({ id, data }) => {
               style={{
                 fontSize: '10px',
                 fontWeight: '600',
-                color: '#10B981',
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
+                color: '#8B5CF6',
+                background: 'rgba(139, 92, 246, 0.12)',
+                border: '1px solid rgba(139, 92, 246, 0.3)',
                 borderRadius: '4px',
                 padding: '3px 8px',
                 cursor: 'pointer',
@@ -177,7 +177,7 @@ export const AgentNode = ({ id, data }) => {
               }}>
                 {agentSteps.map((s, idx) => (
                   <div key={idx} style={{ padding: '4px', borderBottom: '1px solid var(--border-color)' }}>
-                    <div style={{ color: '#10B981', fontWeight: '700' }}>Step {s.step}: {s.action}</div>
+                    <div style={{ color: '#8B5CF6', fontWeight: '700' }}>Step {s.step}: {s.action}</div>
                     {s.result && <div style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)' }}>{String(s.result).slice(0, 100)}...</div>}
                   </div>
                 ))}
