@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useStore } from './store';
 
+const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+
 export const DocumentRecoverySidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [backupData, setBackupData] = useState(null);
   const [previewWfId, setPreviewWfId] = useState(null);
-
-  const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -20,7 +20,7 @@ export const DocumentRecoverySidebar = () => {
     if (rawBackup && !hasHandled) {
       try {
         const parsed = JSON.parse(rawBackup);
-        
+
         // 1. Purge expired auto-backup older than 4 hours (2-4 hours retention policy)
         if (parsed && parsed.timestamp && (Date.now() - parsed.timestamp > FOUR_HOURS_MS)) {
           localStorage.removeItem('vectorshift_auto_backup');
@@ -54,6 +54,7 @@ export const DocumentRecoverySidebar = () => {
         localStorage.removeItem('vectorshift_auto_backup');
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When user clicks a workflow item in the sidebar list, update background canvas with its nodes & edges

@@ -145,7 +145,8 @@ export const SaveButton = () => {
         setJustSaved(false);
       }, 1200);
     }, 150);
-  }, [activeWf.hasBeenFileSaved, activeWf.name, activeWorkflowId, edges, exportWorkflowToFile, markWorkflowFileSaved, nodes, syncActiveWorkflow]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWf.hasBeenFileSaved, activeWf.name, activeWf.fileHandle, activeWorkflowId, edges, exportWorkflowToFile, markWorkflowFileSaved, nodes, syncActiveWorkflow]);
 
   // Keyboard shortcut listener for Ctrl+S / Cmd+S
   useEffect(() => {
