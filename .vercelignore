@@ -1,0 +1,7 @@
+backend/
+frontend/
+Rajdeep_Singh_technical_assessment/
+*.zip
+*.pdf
+*.docx
+.env

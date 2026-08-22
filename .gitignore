@@ -24,6 +24,10 @@ yarn-error.log*
 
 # Keep backend separate for now
 /backend
+/frontend
 /Rajdeep_Singh_technical_assessment
 __pycache__
 *.pyc
+*.zip
+*.pdf
+*.docx
