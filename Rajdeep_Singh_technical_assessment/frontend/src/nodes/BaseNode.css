@@ -1,0 +1,199 @@
+/* BaseNode.css - Theme Adaptive Node Styling */
+
+.basenode-container {
+  border-radius: 12px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--node-shadow);
+  overflow: visible;
+  font-family: var(--font-sans);
+  position: relative;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.basenode-container:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.2), 0 0 15px rgba(99, 102, 241, 0.15);
+}
+
+.basenode-header {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
+}
+
+.basenode-icon {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.basenode-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.basenode-fields {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.basenode-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+  font-family: var(--font-sans);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.basenode-input,
+.basenode-number,
+.basenode-select,
+.basenode-textarea {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 11px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+  transition: all 0.2s ease;
+}
+
+.basenode-input:focus,
+.basenode-number:focus,
+.basenode-select:focus,
+.basenode-textarea:focus {
+  outline: none;
+  border-color: #6366F1;
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.basenode-input:hover,
+.basenode-number:hover,
+.basenode-select:hover,
+.basenode-textarea:hover {
+  border-color: var(--border-hover);
+}
+
+.basenode-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.basenode-textarea {
+  resize: none;
+  font-family: var(--font-sans);
+  line-height: 1.4;
+}
+
+/* Floating Delete Cross Button with Balanced Proportional SVG Vector */
+.basenode-delete-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer !important;
+  pointer-events: all !important;
+  z-index: 120;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  transition: all 0.15s ease-in-out;
+  padding: 0;
+  margin: 0;
+}
+
+.basenode-delete-btn svg {
+  display: block;
+  width: 7.5px;
+  height: 7.5px;
+  margin: auto;
+}
+
+/* Expanded Hit Target Pseudo-Element for Instant Clicking Anywhere Over/Around Circle */
+.basenode-delete-btn::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer !important;
+}
+
+.basenode-delete-btn:hover {
+  background: #EF4444 !important;
+  border-color: #EF4444 !important;
+  color: #FFFFFF !important;
+  transform: scale(1.2);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* ReactFlow Handle Styling — Clean 9px Circular Dots for Direct Drag Connecting */
+.react-flow__handle {
+  width: 9px !important;
+  height: 9px !important;
+  background: #FFFFFF !important;
+  border-radius: 50% !important;
+  cursor: crosshair !important;
+  z-index: 100 !important;
+  pointer-events: all !important;
+}
+
+/* Handle Label — Plain text adjacent to dot (Used only for LLM node) */
+.basenode-handle-label {
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+/* Variable badges in Text node */
+.basenode-variable-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #818CF8;
+  font-size: 10px;
+  font-family: var(--font-sans);
+}
