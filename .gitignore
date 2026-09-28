@@ -13,6 +13,7 @@
 
 # misc
 .DS_Store
+.env
 .env.local
 .env.development.local
 .env.test.local
@@ -22,11 +23,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Keep backend separate for now
-/backend
+# Keep duplicate app copies and generated environments out of the root repository
+/backend/venv
 /frontend
 /Rajdeep_Singh_technical_assessment
-__pycache__
+**/__pycache__
 *.pyc
 *.zip
 *.pdf
